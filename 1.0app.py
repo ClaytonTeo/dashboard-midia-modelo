@@ -92,6 +92,7 @@ def calcular_investimento_row(r):
 df_unificado['Investimento'] = df_unificado.apply(calcular_investimento_row, axis=1)
 
 # ---------- Agora os filtros (lado esquerdo da tela) - usando Campaign Name se existir ----------
+# ---------- Agora os filtros (lado esquerdo da tela) - usando Campaign Name se existir ----------
 st.sidebar.header("🔍 Filtros")
 
 min_data = df_unificado['Day'].min()
@@ -123,12 +124,19 @@ def ajustar_datas(periodo):
 atual_start, atual_end = ajustar_datas(periodo_atual)
 comp_start, comp_end = ajustar_datas(periodo_comp)
 
-campanhas = sorted(df_unificado.get('Campaign Name', pd.Series([], dtype=object)).dropna().unique())
-campanhas_selecionadas = st.sidebar.multiselect('Selecione a(s) campanha(s)', campanhas, default=campanhas)
+# 🔎 Filtro de Campanhas por texto
+st.sidebar.subheader("Filtro de Campanha")
+texto_campanha = st.sidebar.text_input("Digite parte do nome da campanha:")
 
+if "Campaign Name" in df_unificado.columns:
+    if texto_campanha:
+        cond_campanha = df_unificado["Campaign Name"].str.contains(texto_campanha, case=False, na=False)
+    else:
+        cond_campanha = pd.Series(True, index=df_unificado.index)  # mantém tudo
+else:
+    cond_campanha = pd.Series(True, index=df_unificado.index)
 
 # Aplicar filtros (usa df_unificado já limpo)
-cond_campanha = df_unificado.get('Campaign Name').isin(campanhas_selecionadas) if 'Campaign Name' in df_unificado.columns else (pd.Series(True, index=df_unificado.index))
 df_atual = df_unificado[
     cond_campanha &
     (df_unificado['Day'] >= pd.to_datetime(atual_start)) &
@@ -140,6 +148,7 @@ df_comp = df_unificado[
     (df_unificado['Day'] >= pd.to_datetime(comp_start)) &
     (df_unificado['Day'] <= pd.to_datetime(comp_end))
 ].copy()
+
 
 # ---------- Métricas (usar Investimento condicional) ----------
 def calcular_metricas(df):
@@ -527,5 +536,6 @@ fig.update_layout(
     yaxis=dict(showgrid=False, showticklabels=False),
     height=500
 )
+
 
 st.plotly_chart(fig, use_container_width=True)
