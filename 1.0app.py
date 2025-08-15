@@ -92,7 +92,7 @@ def calcular_investimento_row(r):
 df_unificado['Investimento'] = df_unificado.apply(calcular_investimento_row, axis=1)
 
 # ---------- Agora os filtros (lado esquerdo da tela) - usando Campaign Name se existir ----------
-# ---------- Agora os filtros (lado esquerdo da tela) - usando Campaign Name se existir ----------
+
 st.sidebar.header("🔍 Filtros")
 
 min_data = df_unificado['Day'].min()
@@ -539,3 +539,4 @@ fig.update_layout(
 
 
 st.plotly_chart(fig, use_container_width=True)
+
